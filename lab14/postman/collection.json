@@ -8,6 +8,74 @@
   },
   "item": [
     {
+      "name": "auth",
+      "item": [
+        {
+          "name": "login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const json = pm.response.json();\r",
+                  "\r",
+                  "pm.environment.set(\"token\", json.accessToken);\r",
+                  "pm.environment.set(\"userId\", json.id);\r",
+                  "\r",
+                  "pm.test(\"Status is 200\", () => {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Has access token\", () => {\r",
+                  "    const json = pm.response.json();\r",
+                  "    pm.expect(json).to.have.property(\"accessToken\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"User id is number\", () => {\r",
+                  "    const json = pm.response.json();\r",
+                  "    pm.expect(json.id).to.be.a(\"number\");\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"username\": \"emilys\",\r\n  \"password\": \"emilyspass\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
       "name": "users",
       "item": [
         {
@@ -24,6 +92,21 @@
                   "pm.test(\"Has id\", () => {\r",
                   "    const json = pm.response.json();\r",
                   "    pm.expect(json).to.have.property(\"id\");\r",
+                  "});\r",
+                  "\r",
+                  "\r",
+                  "pm.test(\"Status is 200 or 201\", () => {\r",
+                  "    pm.expect([200, 201]).to.include(pm.response.code);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response has firstName\", () => {\r",
+                  "    const json = pm.response.json();\r",
+                  "    pm.expect(json).to.have.property(\"firstName\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Age is number\", () => {\r",
+                  "    const json = pm.response.json();\r",
+                  "    pm.expect(json.age).to.be.a(\"number\");\r",
                   "});"
                 ],
                 "type": "text/javascript",
@@ -37,7 +120,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"firstName\": \"Erhes\",\r\n  \"age\": 21\r\n}",
+              "raw": "{\r\n  \"firstName\": \"Erhes\",\r\n  \"age\": 21\r\n}\r\n\r\n",
               "options": {
                 "raw": {
                   "language": "json"
@@ -68,9 +151,9 @@
                   "    pm.response.to.have.status(200);\r",
                   "});\r",
                   "\r",
-                  "pm.test(\"User id is 1\", () => {\r",
+                  "pm.test(\"User id is 2\", () => {\r",
                   "    const json = pm.response.json();\r",
-                  "    pm.expect(json.id).to.eql(1);\r",
+                  "    pm.expect(json.id).to.eql(2);\r",
                   "});\r",
                   "\r",
                   "pm.test(\"Has username\", () => {\r",
@@ -119,7 +202,12 @@
                   "\r",
                   "pm.test(\"Name updated\", () => {\r",
                   "    const json = pm.response.json();\r",
-                  "    pm.expect(json.firstName).to.eql(\"UpdatedName\");\r",
+                  "    pm.expect(json.firstName).to.eql(\"updatedName\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Has firstName\", () => {\r",
+                  "    const json = pm.response.json();\r",
+                  "    pm.expect(json).to.have.property(\"firstName\");\r",
                   "});"
                 ],
                 "type": "text/javascript",
@@ -188,9 +276,38 @@
         },
         {
           "name": "get users",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status is 200\", () => {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response has users\", () => {\r",
+                  "    const json = pm.response.json();\r",
+                  "    pm.expect(json).to.have.property(\"users\");\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
           "request": {
             "method": "GET",
-            "header": []
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users"
+              ]
+            }
           },
           "response": []
         },
@@ -245,37 +362,19 @@
       "item": [
         {
           "name": "not found",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/users/{{userId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "users",
-                "{{userId}}"
-              ]
-            }
-          },
-          "response": []
-        }
-      ]
-    },
-    {
-      "name": "auth",
-      "item": [
-        {
-          "name": "login",
           "event": [
             {
               "listen": "test",
               "script": {
                 "exec": [
-                  "const json = pm.response.json();\r",
-                  "pm.environment.set(\"token\", json.accessToken);\r",
-                  "pm.environment.set(\"userId\", json.id);"
+                  "pm.test(\"Status is 404\", () => {\r",
+                  "    pm.response.to.have.status(404);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Has error message\", () => {\r",
+                  "    const json = pm.response.json();\r",
+                  "    pm.expect(json).to.have.property(\"message\");\r",
+                  "});"
                 ],
                 "type": "text/javascript",
                 "packages": {},
@@ -284,31 +383,16 @@
             }
           ],
           "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\r\n  \"username\": \"emilys\",\r\n  \"password\": \"emilyspass\"\r\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
+            "method": "GET",
+            "header": [],
             "url": {
-              "raw": "{{baseUrl}}/auth/login",
+              "raw": "{{baseUrl}}/users/999999",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "auth",
-                "login"
+                "users",
+                "999999"
               ]
             }
           },
